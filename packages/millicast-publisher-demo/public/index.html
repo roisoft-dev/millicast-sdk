@@ -56,6 +56,12 @@
 
 </head>
 <body>
+<input type="hidden" id="streamName" value="" />
+<input type="hidden" id="accountId" value="" />
+<input type="hidden" id="publishToken" value="" />
+<div id="box-processing" class="col-2 offset-5 rounded p-2 h5 bg-danger text-white text-center fixed-top" style="display: none;">
+    <h5 class="mb-0"><i class="fas fa-spinner fa-spin"></i> <span class="d-none d-md-inline-block">Processando...</span></h5>
+</div>
 <div class="turnDeviceNotification"><img class="w-100" src='./do-landscape-icon.png'></div>
 <div class="turnDeviceNotification notification-margin-top"><img class="w-100" src='do-landscape-icon-wide.png'></div>
 <div id="publishView" class="">
@@ -67,32 +73,30 @@
         </div>
         <!-- Overlay controls -->
         <div id="controlDisplay" class="">
-
             <div id="topFade" class="fixed-top vid-fade blk-fade-top-bottom"></div>
             <div id="btmFade" class="fixed-bottom vid-fade blk-fade-bottom-top"></div>
 
             <div id="airIndicatorView" class="w-100 d-flex justify-content-start">
               <div id="readyBadge" class="badges btn-group" role="group">
-                <span class="btn btn-sm btn-light ignore-mouse"> READY </span>
+                <span class="btn btn-sm btn-light ignore-mouse"> OFF </span>
               </div>
               <div id="liveBadge" class="badges btn-group hidden" role="group">
                 <span class="btn btn-sm btn-danger ignore-mouse"> LIVE </span>
-                <span class="btn btn-sm btn-light ignore-mouse"><i class="fas fa-eye"></i> <span id="userCount"> 0 </span></span>
+                    <span class="btn btn-sm btn-light ignore-mouse"><i class="fas fa-eye"></i> <span id="userCount"> 0 </span></span>
               </div>
             </div>
 
             <div class="dropdown" style="z-index: 20; right: 20px; top: 20px; position: absolute;">
-                <button id="bandwidthMenuButton" class="btn btn-secondary dropdown-toggle w-100 fs-15px" type="button"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Maximum Bitrate
-                </button>
+                <button class="btn btn-secondary dropdown-toggle w-100 fs-15px" type="button" id="bandwidthMenuButton" disabled data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Padrão</button>
                 <div class="dropdown-menu dropdown-menu-right" id="bandwidthMenu" aria-labelledby="dropdownMenuButton">
-                    <div class="dropdown-item fs-15px"  data-rate="unlimited">Maximum Bitrate</div>
-                    <div class="dropdown-item fs-15px"  data-rate="2000">2000 kbps</div>
-                    <div class="dropdown-item fs-15px"  data-rate="1000">1000 kbps</div>
-                    <div class="dropdown-item fs-15px"  data-rate="500">500 kbps</div>
-                    <div class="dropdown-item fs-15px"  data-rate="250">250 kbps</div>
-                    <div class="dropdown-item fs-15px"  data-rate="125">125 kbps</div>
+                    <div class="dropdown-item fs-15px disabled d-none" data-rate="unlimited">Máximo</div>
+                    <div class="dropdown-item fs-15px disabled" data-rate="500000">Máximo <small title="Entre em contato para ter maior qualidade.">(?)</small></div>
+                    <div class="dropdown-item fs-15px disabled d-none" data-rate="100000">100.000 kbps</div>
+                    <div class="dropdown-item fs-15px disabled d-none" data-rate="50000">50.000 kbps</div>
+                    <div class="dropdown-item fs-15px disabled d-none" data-rate="1000">1.000 kbps</div>
+                    <div class="dropdown-item fs-15px" data-rate="500">Padrão</div>
+                    <div class="dropdown-item fs-15px" data-rate="250">250 kbps</div>
+                    <div class="dropdown-item fs-15px" data-rate="125">125 kbps</div>
                 </div>
             </div>
             
@@ -213,10 +217,11 @@
             </div>
             <!-- PUBLISH BUTTON -->
             <div id="publishSection" class="col-4 col-xl-4 px-1 px-sm-3">
-                <button id="publishBtn" type="button" class="btn btn-success btn-lg btn-block">Start</button>
+                <button id="publishBtn" type="button" class="btn btn-success btn-lg btn-block">Iniciar</button>
+                <button id="stopBtn" type="button" class="btn btn-danger btn-lg btn-block mt-0 d-none">Parar</button>
             </div>
             <div id="shareSection" class="col-4 col-xl-4 px-1 px-sm-3 d-none">
-                <div class="btn-group btn-block" role="group" aria-label="Viewer Path">
+                <div class="btn-group btn-block d-none" role="group" aria-label="Viewer Path">
                     <button id="viewerURL" type="button" class="btn btn-block px-3">https://</button>
                     <button id="copyBtn" type="button" class="btn btn-secondary px-3">copy</button><!-- <i class="fas fa-copy ignore-mouse"></i> -->
                 </div>
@@ -247,16 +252,14 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </section>
 </div>
 
-  <div id="guides" class="w-100 h-100 position-absolute" style="pointer-events: none;">
+<div id="guides" class="w-100 h-100 position-fixed" style="pointer-events: none;">
     <div style="pointer-events:all;">
-
-      <div id="guide1" class="guide-view p-4">
+        <div id="guide1" class="guide-view p-4 d-none">
         <div class="position-absolute" onclick="showGuide('guide1', false)"
               style="cursor: pointer; color: #464646; right:0; top: 0; padding: 0px 5px; margin-right: 0.5rem; margin-top: 0.6rem;">
           <i class="fas fa-times text-white"></i>
@@ -280,7 +283,6 @@
             <p class="ml-2">If all looks well, and you have selected the correct camera and microphone options below click the green start button to begin broadcasting.</p>
           </div>
         </div>
-
       </div>
 
       <div id="guide2" class="guide-view px-3 py-3 rounded d-none">
@@ -291,7 +293,6 @@
           <h6 class="mb-3">How to Share:</h6>
           <p class="mb-2">To share the URL to your live broadcast, click on the copy button below to copy the URL to your computer's clipboard so you can share it publicly.</p>
       </div>
-
     </div>
   </div>
 
@@ -390,13 +391,13 @@
 </div>
 
 <script>
-  function showGuide(id, b){
-    console.log('toggleGuide ',id,' show:',b);
-    let gd = $('#'+id);
-    if(!!gd && gd.length > 0) {
-      if(b) {
-        if(gd.hasClass('d-none')){
-          gd.toggleClass('d-none',false);
+    function showGuide(id, b) {
+        //console.log('toggleGuide ', id, ' show:', b);
+        let gd = $('#' + id);
+        if (!!gd && gd.length > 0) {
+            if (b) {
+                if (gd.hasClass('d-none')) {
+                    gd.toggleClass('d-none', false);
         }
         gd.show();
       } else {
@@ -415,7 +416,5 @@
 
 <!-- MILLICAST -->
 <script src="./publisher.umd.js"></script>
-
 </body>
 </html>
-

@@ -14,7 +14,7 @@ html{
 }
 
 #vidContainer {
-  position: fixed;
+  position: absolute;
   bottom: 0;
   top: 0;
   left: 0;
@@ -40,16 +40,16 @@ Black faded bars in control display for video.
 */
 
 .blk-fade-top-bottom {
-  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+  /*background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));*/
 }
 
 .blk-fade-bottom-top {
-  background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8));
+  /*background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8));*/
 }
 
 #controlDisplay .vid-fade {
   width: 100%;
-  position: absolute;
+  position: relative;
 }
 
 #controlDisplay #topFade {
@@ -89,7 +89,7 @@ Black faded bars in control display for video.
 } */
 
 #guides #guide2, #guides #guide1 {
-  bottom: 140px;
+  bottom: 430px;
   width: 280px;
 }
 
@@ -214,10 +214,10 @@ Black faded bars in control display for video.
   background: #ddd;
 }
 
-#vidCtrlView #publishBtn {
+/*#vidCtrlView #publishBtn {
   font-size: 0.85rem;
   height: 50px;
-}
+}*/
 
 #thanks{
   padding-top: 15%;
@@ -439,4 +439,18 @@ video{
   .notification-margin-top {
     margin-top: -210px;
   }
+}
+#userCntView {
+    position: absolute;
+    right: 20px; 
+    top: 100px; 
+    z-index: 20; 
+    color: white;
+    background-color: black;
+    border-radius: 3px;
+    padding: 10px 0 10px 15px;
+}
+#userCntView #count {
+    margin: 0;
+    font-size: 13px;
 }

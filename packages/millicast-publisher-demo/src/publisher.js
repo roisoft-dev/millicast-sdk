@@ -3,9 +3,14 @@ import { Director, Logger, StreamEvents } from "@millicast/sdk"
 
 window.Logger = Logger
 
-const streamName = process.env.MILLICAST_STREAM_NAME
-const accountId = process.env.MILLICAST_ACCOUNT_ID
-const publishToken = process.env.MILLICAST_PUBLISH_TOKEN
+const streamName = document.getElementById('streamName').value
+const accountId = document.getElementById('accountId').value
+const publishToken = document.getElementById('publishToken').value
+console.log(JSON.stringify({streamName: streamName, accountId: accountId, publishToken: publishToken}))
+//const streamName = process.env.MILLICAST_STREAM_NAME
+//const accountId = process.env.MILLICAST_ACCOUNT_ID
+//const publishToken = process.env.MILLICAST_PUBLISH_TOKEN
+
 const disableVideo = false
 const disableAudio = false
 const disableStereo = false
@@ -47,6 +52,8 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
   //publish button
   let pubBtn      = document.getElementById('publishBtn');
+  //stop button
+  let stopBtn     = document.getElementById('stopBtn');
   //Cam elements
   let camsList    = document.getElementById('camList'),
       camMuteBtn  = document.getElementById('camMuteBtn');
@@ -127,15 +134,18 @@ document.addEventListener("DOMContentLoaded", async (event) => {
   const tokenGenerator = () => Director.getPublisher(publishToken, streamName)
   const millicastPublishUserMedia = window.millicastPublish = await MillicastPublishUserMedia.build({ streamName }, tokenGenerator, true)
   let selectedBandwidthBtn = document.querySelector('#bandwidthMenuButton');
-  let bandwidth = 0
+  let bandwidth = 500; //0 = maximum
 
   const BroadcastMillicastStream = async () => {
+    console.log('BroadcastMillicastStream bandwidth: ', bandwidth)
     try{
-      await millicastPublishUserMedia.connect({ bandwidth, codec: 'av1' })
+      loading('block');
+      await millicastPublishUserMedia.connect({ bandwidth, codec: 'h264' })
       isBroadcasting = true;
       broadcastHandler();
     }
     catch(error){
+      loading('none');
       console.log(error);
           isBroadcasting = false;
           broadcastHandler();
@@ -146,7 +156,12 @@ document.addEventListener("DOMContentLoaded", async (event) => {
   const onSetVideoBandwidth = async (evt) => {
     selectedBandwidthBtn.disabled  = true;
     bandwidth                      = evt.target.dataset.rate;
-    selectedBandwidthBtn.innerHTML = bandwidth === 0 ? 'Maximum Bitrate' : `${bandwidth} kbps`;
+    
+    console.log('onSetVideoBandwidth bandwidth: ', bandwidth)
+    let selectedBandwidthDropdown = document.querySelectorAll("[data-rate='" + bandwidth + "']");
+    selectedBandwidthDropdown = selectedBandwidthDropdown.length === 0 ? null : selectedBandwidthDropdown[0];
+    selectedBandwidthBtn.innerHTML = selectedBandwidthDropdown ? selectedBandwidthDropdown.innerHTML : 'Padrão';
+    //selectedBandwidthBtn.innerHTML = bandwidth === 0 ? 'Maximum Bitrate' : `${bandwidth} kbps`;
 
     if(!millicastPublishUserMedia.isActive()){
       selectedBandwidthBtn.disabled = false;
@@ -178,8 +193,13 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     if (disableVideo === true) {
       selectedBandwidthBtn.classList.add('d-none');
     }
-    selectedBandwidthBtn.innerHTML = bandwidth === 0 ? 'Maximum Bitrate' : `${bandwidth} kbps`;
-    if( bandwidth !== 0 )onSetVideoBandwidth();
+    
+    let selectedBandwidthDropdown = document.querySelectorAll("[data-rate='" + bandwidth + "']");
+    selectedBandwidthDropdown = selectedBandwidthDropdown.length === 0 ? null : selectedBandwidthDropdown[0];
+    selectedBandwidthBtn.innerHTML = selectedBandwidthDropdown ? selectedBandwidthDropdown.innerHTML : 'Bom';
+    //selectedBandwidthBtn.innerHTML = bandwidth === 0 ? 'Maximum Bitrate' : `${bandwidth} kbps`;
+    //if( bandwidth !== 0 )onSetVideoBandwidth();
+    
     elementList.forEach(function (el) {
       el.classList.add('btn');
       el.addEventListener('click', onSetVideoBandwidth)
@@ -213,7 +233,15 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     }
     pubBtn.addEventListener('click', async (e) => {
       await BroadcastMillicastStream();
-    })
+    });
+    stopBtn.addEventListener('click', async (e) => {
+      if (millicastPublishUserMedia) {
+        millicastPublishUserMedia.stop();
+      }
+      isBroadcasting = false;
+      broadcastHandler();
+      //window.location.reload();
+    });
 
     //
     camsList.addEventListener('click', async (e) => {
@@ -325,26 +353,34 @@ document.addEventListener("DOMContentLoaded", async (event) => {
 
   function broadcastHandler(b) {
     if (isBroadcasting) {
-      showViewerUrl();
+      //showViewerUrl();
       onAirFlag.classList.remove('hidden')
       readyFlag.classList.add('hidden')
       //
       pubBtn.disabled               = true;
-      selectedBandwidthBtn.disabled = false;
-      if (!tm) {
-        setTimer();
-      }
+      pubBtn.classList.add('d-none');
+      stopBtn.classList.remove('d-none');
+      //selectedBandwidthBtn.disabled = false;
+      
+      //if (!tm) {
+      //  setTimer();
+      //}
+      
       //switch guides display.
       if(showGuide){
         showGuide('guide1', false);
-        showGuide('guide2', true);
+        showGuide('guide2', false);
       }
     } else {
       onAirFlag.classList.add('hidden')
       readyFlag.classList.remove('hidden')
       //
       pubBtn.disabled               = false;
+      pubBtn.classList.remove('d-none');
+      stopBtn.classList.add('d-none');
     }
+    
+    loading('none');
   }
 
   function showViewerUrl() {
@@ -429,6 +465,12 @@ document.addEventListener("DOMContentLoaded", async (event) => {
     alert('Copied to Clipboard!');
     document.body.removeChild(txt);
     return true;
+  }
+  
+  function loading(display) {
+    if(document.getElementById('box-processing')) {
+      document.getElementById('box-processing').style.display = display;
+    }
   }
 
   initUI()
