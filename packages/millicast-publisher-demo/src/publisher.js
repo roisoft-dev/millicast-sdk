@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", async (event) => {
   const tokenGenerator = () => Director.getPublisher(publishToken, streamName)
   const millicastPublishUserMedia = window.millicastPublish = await MillicastPublishUserMedia.build({ streamName }, tokenGenerator, true)
   let selectedBandwidthBtn = document.querySelector('#bandwidthMenuButton');
-  let bandwidth = 500; //0 = maximum
+  let bandwidth = 600; //0 = maximum
 
   const BroadcastMillicastStream = async () => {
     console.log('BroadcastMillicastStream bandwidth: ', bandwidth)
